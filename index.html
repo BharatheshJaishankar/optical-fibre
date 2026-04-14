@@ -27,13 +27,31 @@
 			}
 			section h2, section h3 { color: var(--serif-accent); }
 			.reveal hr { border-color: var(--serif-accent); }
+			#fullscreen-btn {
+  font-family: sans-serif;
+  font-size: 14px;
+  backdrop-filter: blur(5px); /* Modern frosted glass look */
+  transition: opacity 0.3s;
+}
+
+/* Optional: Hide the button when actually in fullscreen mode */
+:fullscreen #fullscreen-btn {
+  opacity: 0.2;
+}
+
+#fullscreen-btn:hover {
+  background: rgba(255,255,255,0.4);
+}
 		</style>
 	</head>
 	<body>
-		<div class="reveal">
+		<div class="reveal">			<button id="fullscreen-btn" style="position: absolute; bottom: 20px; left: 20px; z-index: 30; padding: 10px; cursor: pointer; border-radius: 5px; border: none; background: rgba(255,255,255,0.2); color: #000;">
+    ⛶
+  </button>
 			<div class="slides">
 
 				<section data-auto-animate>
+		
 					<h3 data-id="header" style="color: red;">Disclaimer</h3>
 					<p class="fragment">Nothing wrong will be taught to you in the next 10 minutes.</p>
 				</section>
@@ -299,6 +317,18 @@
 				autoAnimateDuration: 1.0,
 				plugins: [RevealHighlight],
 				});
+				
+				// Fullscreen
+				document.getElementById('fullscreen-btn').addEventListener('click', function() {
+	if (!document.fullscreenElement) {
+		// Request fullscreen for the entire page body
+		document.documentElement.requestFullscreen().catch(err => {
+			alert(`Error: ${err.message}`);
+		});
+	} else {
+		document.exitFullscreen();
+	}
+});
 		</script>
 	</body>
 </html>
