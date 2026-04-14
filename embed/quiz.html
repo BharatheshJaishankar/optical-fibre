@@ -1,0 +1,266 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TIR Quiz - Small Screen Optimized</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { 
+            background: #0a0a0a; 
+            color: #f0f0f0; 
+            margin: 0;
+            font-family: ui-sans-serif, system-ui, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #app {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Split Screen Container */
+        .main-wrapper {
+            display: flex;
+            flex: 1;
+            width: 100%;
+            min-height: calc(100vh - 80px); /* Tighter footer */
+        }
+
+        /* Question Panel - Reduced padding and font size */
+        .question-panel {
+            flex: 1;
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            border-right: 1px solid #222;
+            background: linear-gradient(to right, #0a0a0a, #0f0f0f);
+        }
+
+        /* Options Panel - Reduced padding */
+        .options-panel {
+            flex: 1;
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        /* Compact Cards */
+        .option-card {
+            margin-bottom: 0.75rem;
+            min-height: 60px;
+            padding: 1rem;
+            border: 2px solid #222;
+            background: #111;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 1.05rem; /* Reduced from 1.25rem */
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .correct-style {
+            border-color: #22c55e !important;
+            background: rgba(22, 101, 52, 0.3) !important;
+            color: #4ade80 !important;
+            transform: scale(1.02);
+            font-weight: bold;
+            box-shadow: 0 0 20px rgba(34, 197, 94, 0.2);
+        }
+
+        .dim-style {
+            opacity: 0.15;
+            filter: grayscale(1);
+        }
+
+        /* Footer Area - Reduced height */
+        .footer-bar {
+            height: 80px;
+            width: 100%;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 1.5rem;
+            border-top: 1px solid #222;
+            position: sticky;
+            bottom: 0;
+            z-index: 50;
+        }
+
+        .fade-in { animation: fadeIn 0.5s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Smaller Math for small screens */
+        math { font-size: 1.1em; }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .main-wrapper { flex-direction: column; }
+            .question-panel { 
+                border-right: none; 
+                border-bottom: 1px solid #222; 
+                padding: 1.5rem;
+                min-height: auto;
+            }
+            .options-panel { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="app">
+        
+        <div class="main-wrapper">
+            <!-- Left: Question -->
+            <div class="question-panel">
+                <div id="counter" class="text-blue-500 font-mono text-xs mb-3 font-bold tracking-widest uppercase">
+                    Question 1 / 5
+                </div>
+                <!-- Reduced from text-3xl/5xl to text-2xl/4xl -->
+                <div id="question-text" class="text-2xl lg:text-3xl font-extrabold leading-tight">
+                    <!-- Injected -->
+                </div>
+                <div id="status-label" class="mt-4 text-gray-500 text-sm font-medium italic">
+                    Initializing...
+                </div>
+            </div>
+
+            <!-- Right: Options -->
+            <div id="options-panel" class="options-panel">
+                <div id="options-grid" class="w-full opacity-0 pointer-events-none transition-opacity duration-500">
+                    <!-- Injected -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Section: Control Bar -->
+        <div class="footer-bar">
+            <!-- Timer Container -->
+            <div id="timer-wrapper" class="w-full max-w-4xl bg-gray-900 h-3 rounded-full overflow-hidden">
+                <div id="progress-bar" class="bg-blue-600 h-full w-0 transition-all linear"></div>
+            </div>
+
+            <!-- Next Button - Compact Sizing -->
+            <button id="next-btn" class="hidden bg-white text-black px-10 py-2.5 rounded-full font-bold text-base hover:bg-blue-600 hover:text-white transition-all active:scale-95 shadow-xl border-none cursor-pointer">
+                NEXT QUESTION →
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                q: "For Total Internal Reflection to occur, light must travel toward a medium that is:",
+                options: ["Optically Denser (e.g. Air to Glass)", "Less Optically Dense (e.g. Glass to Air)", "A Perfectly Reflective Mirror", "A complete Vacuum"],
+                correct: 1
+            },
+            {
+                q: "When the angle of incidence is exactly the <math><msub><mi>θ</mi><mi>c</mi></msub></math>, the angle of refraction is:",
+                options: ["<math><mn>0</mn><mo>°</mo></math>", "<math><mn>45</mn><mo>°</mo></math>", "<math><mn>90</mn><mo>°</mo></math>", "<math><mn>180</mn><mo>°</mo></math>"],
+                correct: 2
+            },
+            {
+                q: "Which technology uses Total Internal Reflection to pipe data over long distances?",
+                options: ["Satellite Microwave Links", "Copper Ethernet Cables", "Fiber Optic Cables", "5G Cellular Towers"],
+                correct: 2
+            },
+            {
+                q: "A diamond's sparkle is caused by light being 'trapped' and reflecting multiple times. This is because diamonds have a:",
+                options: ["Very High Critical Angle", "Very Low Critical Angle", "Negative Refractive Index", "Metallic Coating"],
+                correct: 1
+            },
+            {
+                q: "Solve: If <math><mi>n</mi><mo>=</mo><mn>2.0</mn></math> for a crystal, what is its critical angle into air?<br><br><small><math><mo>sin</mo><mo>(</mo><msub><mi>θ</mi><mi>c</mi></msub><mo>)</mo><mo>=</mo><mfrac><mn>1</mn><mn>2</mn></mfrac></math></small>",
+                options: ["<math><mn>30</mn><mo>°</mo></math>", "<math><mn>45</mn><mo>°</mo></math>", "<math><mn>60</mn><mo>°</mo></math>", "<math><mn>90</mn><mo>°</mo></math>"],
+                correct: 0
+            }
+        ];
+
+        let currentIndex = 0;
+        let t1, t2;
+
+        const ui = {
+            question: document.getElementById('question-text'),
+            grid: document.getElementById('options-grid'),
+            progress: document.getElementById('progress-bar'),
+            timerWrapper: document.getElementById('timer-wrapper'),
+            nextBtn: document.getElementById('next-btn'),
+            status: document.getElementById('status-label'),
+            counter: document.getElementById('counter')
+        };
+
+        function loadQuestion(idx) {
+            const data = questions[idx];
+            clearTimeout(t1); clearTimeout(t2);
+
+            ui.counter.innerText = `Question ${idx + 1} / ${questions.length}`;
+            ui.question.innerHTML = data.q;
+            ui.grid.innerHTML = '';
+            ui.grid.classList.add('opacity-0', 'pointer-events-none');
+            
+            ui.timerWrapper.style.display = 'block';
+            ui.nextBtn.style.display = 'none';
+            
+            ui.status.innerText = "Observe...";
+            ui.progress.style.transition = 'none';
+            ui.progress.style.width = '0%';
+
+            data.options.forEach((opt, i) => {
+                const div = document.createElement('div');
+                div.className = "option-card fade-in";
+                div.style.animationDelay = `${i * 0.1}s`;
+                div.innerHTML = opt;
+                div.id = `opt-${i}`;
+                ui.grid.appendChild(div);
+            });
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            t1 = setTimeout(() => {
+                ui.grid.classList.remove('opacity-0', 'pointer-events-none');
+                ui.status.innerText = "Select mentally...";
+                ui.progress.style.transition = `width 8000ms linear`;
+                ui.progress.style.width = '100%';
+            }, 2000);
+
+            t2 = setTimeout(() => {
+                const correct = document.getElementById(`opt-${data.correct}`);
+                if (correct) correct.classList.add('correct-style');
+                
+                document.querySelectorAll('.option-card').forEach((c, i) => {
+                    if (i !== data.correct) c.classList.add('dim-style');
+                });
+
+                ui.timerWrapper.style.display = 'none';
+                ui.nextBtn.style.display = 'block';
+                ui.nextBtn.classList.add('fade-in');
+                ui.status.innerText = "Answer Revealed";
+            }, 10000);
+        }
+
+        ui.nextBtn.addEventListener('click', () => {
+            currentIndex++;
+            if (currentIndex < questions.length) {
+                loadQuestion(currentIndex);
+            } else {
+                ui.question.innerHTML = "Quiz Complete!";
+                ui.grid.innerHTML = '';
+                ui.nextBtn.style.display = 'none';
+                ui.status.innerText = "Success.";
+                ui.counter.innerText = "END";
+            }
+        });
+
+        window.onload = () => loadQuestion(0);
+    </script>
+</body>
+</html>
